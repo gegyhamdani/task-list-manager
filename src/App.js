@@ -36,7 +36,7 @@ const useStyles = (theme) => ({
     justifyContent: "space-between",
   },
   textField: {
-    marginRight: theme.spacing(6),
+    marginRight: "1rem",
     width: "250px",
   },
   textFieldTags: {
@@ -107,6 +107,10 @@ class App extends BaseComponent {
       });
       this.setState({ inputContent: "", inputTags: "", isInputWarning: false });
     }
+  };
+
+  handleDeleteTask = async (id) => {
+    ModelStore.deleteItem(id);
   };
 
   render() {
@@ -216,6 +220,7 @@ class App extends BaseComponent {
                         color="secondary"
                         size="large"
                         className={classes.buttonTask}
+                        onClick={() => this.handleDeleteTask(item._id)}
                       >
                         Delete
                       </Button>
