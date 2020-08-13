@@ -26,7 +26,6 @@ const useStyles = () => ({
   },
   paper: {
     padding: "2rem",
-    backgroundColor: "#FAFAFA",
     borderRadius: 0,
     boxShadow:
       "0px 2px 1px -1px rgba(0,0,0,0.4), 0px 1px 1px 0px rgba(0,0,0,0.2), 0px 1px 3px 0px rgba(0,0,0,0.2)",
@@ -50,6 +49,14 @@ const useStyles = () => ({
     position: "relative",
     top: "50%",
     transform: "translateY(-50%)",
+  },
+  contentHeader: {
+    display: "flex",
+    alignItems: "center",
+  },
+  textStyle: {
+    margin: 0,
+    wordBreak: "break-word",
   },
 });
 
@@ -107,6 +114,7 @@ class App extends BaseComponent {
       await ModelStore.addItem({
         text: this.state.inputContent,
         tags: this.state.inputTags,
+        done: false,
       });
       this.setState({ inputContent: "", inputTags: "", isInputWarning: false });
     }
@@ -147,6 +155,13 @@ class App extends BaseComponent {
     }
   };
 
+  handleDoneTask = async (event, id, doneStatus) => {
+    event.preventDefault();
+    await ModelStore.editItem(id, {
+      done: !doneStatus,
+    });
+  };
+
   render() {
     const { state, props } = this;
     const {
@@ -170,7 +185,10 @@ class App extends BaseComponent {
           <h1 style={{ textAlign: "center" }}>Task List Manager</h1>
           <Grid container spacing={3}>
             <Grid item xs>
-              <Paper className={classes.paper}>
+              <Paper
+                className={classes.paper}
+                style={{ backgroundColor: "#FCFCFC" }}
+              >
                 <h3 style={{ textAlign: "center", margin: "-1rem 0 1.5rem 0" }}>
                   Add New Task
                 </h3>
@@ -216,18 +234,24 @@ class App extends BaseComponent {
                     Submit
                   </Button>
                 </form>
-                {isInputWarning ? (
-                  <p style={{ margin: 0, color: "red" }}>Form Must Not Empty</p>
-                ) : null}
+                {isInputWarning && (
+                  <p className={classes.textStyle} style={{ color: "red" }}>
+                    Form Must Not Empty
+                  </p>
+                )}
               </Paper>
             </Grid>
           </Grid>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             <Grid item xs>
               {ModelStore.data.map((item, idx) => (
-                <Paper className={classes.paper} key={item._id}>
+                <Paper
+                  className={classes.paper}
+                  key={item._id}
+                  style={{ backgroundColor: item.done ? "#F5F5F5" : "#FCFCFC" }}
+                >
                   <div className={classes.formContainer}>
-                    <div>
+                    <div style={{ maxWidth: "400px" }}>
                       {editableContentIndex === idx ? (
                         <TextField
                           id="editContent"
@@ -237,21 +261,34 @@ class App extends BaseComponent {
                           onChange={this.onChangeEditTask}
                         />
                       ) : (
-                        <>
-                          <h2 style={{ margin: 0 }}>
+                        <div className={classes.contentHeader}>
+                          <h2 className={classes.textStyle}>
                             {item.text || "No Content"}
                           </h2>
-                        </>
+                          {item.done && (
+                            <img
+                              src="./done.png"
+                              alt="Logo"
+                              height={15}
+                              style={{ marginLeft: "4px" }}
+                            />
+                          )}
+                        </div>
                       )}
-                      <p style={{ margin: 0 }}>{item.tags || "No Tags"}</p>
-                      <p style={{ margin: 0 }}>
+                      <p className={classes.textStyle}>
+                        {item.tags || "No Tags"}
+                      </p>
+                      <p className={classes.textStyle}>
                         {item.createdAt || "No Date Time"}
                       </p>
-                      {isEditWarning && editableContentIndex === idx ? (
-                        <p style={{ margin: 0, color: "red" }}>
+                      {isEditWarning && editableContentIndex === idx && (
+                        <p
+                          className={classes.textStyle}
+                          style={{ color: "red" }}
+                        >
                           Content Must Not Empty
                         </p>
-                      ) : null}
+                      )}
                     </div>
                     <div>
                       {editableContentIndex === idx ? (
@@ -273,8 +310,11 @@ class App extends BaseComponent {
                             size="large"
                             className={classes.buttonTask}
                             style={{ marginRight: "4px" }}
+                            onClick={(e) =>
+                              this.handleDoneTask(e, item._id, item.done)
+                            }
                           >
-                            Done
+                            {item.done ? "UnDone" : "Done"}
                           </Button>
                           <Button
                             variant="outlined"
