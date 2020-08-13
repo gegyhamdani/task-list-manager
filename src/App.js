@@ -1,26 +1,234 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import ModelStore from "./model/ModelStore";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import {
+  Container,
+  Paper,
+  Grid,
+  withStyles,
+  TextField,
+  Button,
+} from "@material-ui/core";
+
+window.ModelStore = ModelStore;
+
+class BaseComponent extends React.PureComponent {
+  rerender = () => {
+    this.setState({
+      _rerender: new Date(),
+    });
+  };
 }
 
-export default App;
+const useStyles = (theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: "2rem",
+    backgroundColor: "#FAFAFA",
+    borderRadius: 0,
+    boxShadow:
+      "0px 2px 1px -1px rgba(0,0,0,0.4), 0px 1px 1px 0px rgba(0,0,0,0.2), 0px 1px 3px 0px rgba(0,0,0,0.2)",
+  },
+  formContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  textField: {
+    marginRight: theme.spacing(6),
+    width: "250px",
+  },
+  textFieldTags: {
+    width: "150px",
+  },
+  buttonStyle: {
+    padding: "0.5rem 3rem",
+  },
+  buttonTask: {
+    padding: "0.5rem 2rem",
+    position: "relative",
+    top: "50%",
+    transform: "translateY(-50%)",
+  },
+});
+
+class App extends BaseComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isInitialized: false,
+      isInputWarning: false,
+      inputContent: "",
+      inputTags: "",
+    };
+  }
+
+  async componentDidMount() {
+    ModelStore.setName("todos_gegy");
+    await ModelStore.initialize();
+    this.setState({
+      isInitialized: true,
+    });
+    this.unsubStore = ModelStore.subscribe(this.rerender);
+  }
+
+  async componentDidUpdate() {
+    if (!ModelStore.isInitialized) {
+      console.log("popup initialize all offline data...");
+      ModelStore.setName("todos_gegy");
+      await ModelStore.initialize();
+      console.log("popup done");
+    }
+  }
+
+  componentWillUnmount() {
+    this.unsubStore();
+  }
+
+  onChangeAddTask = (event) => {
+    const {
+      target: { id, value },
+    } = event;
+
+    if (id === "content")
+      return this.setState({ inputContent: value, isInputWarning: false });
+    return this.setState({ inputTags: value, isInputWarning: false });
+  };
+
+  handleAddTask = async (event) => {
+    event.preventDefault();
+    if (!this.state.inputContent || !this.state.inputTags) {
+      this.setState({ isInputWarning: true });
+    } else {
+      await ModelStore.addItem({
+        text: this.state.inputContent,
+        tags: this.state.inputTags,
+      });
+      this.setState({ inputContent: "", inputTags: "", isInputWarning: false });
+    }
+  };
+
+  render() {
+    const { state, props } = this;
+    const { inputContent, inputTags, isInputWarning, isInitialized } = state;
+    const { classes } = props;
+
+    if (!isInitialized) {
+      return null;
+    }
+
+    return (
+      <div className={classes.root}>
+        <Container maxWidth="md">
+          <h1 style={{ textAlign: "center" }}>Task List Manager</h1>
+          <Grid container spacing={3}>
+            <Grid item xs>
+              <Paper className={classes.paper}>
+                <h3 style={{ textAlign: "center", margin: "-1rem 0 1.5rem 0" }}>
+                  Add New Task
+                </h3>
+                <form
+                  noValidate
+                  autoComplete="off"
+                  className={classes.formContainer}
+                  onSubmit={this.handleAddTask}
+                >
+                  <div>
+                    <TextField
+                      id="content"
+                      label="Content"
+                      variant="outlined"
+                      size="small"
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      value={inputContent}
+                      onChange={this.onChangeAddTask}
+                    />
+                    <TextField
+                      id="tags"
+                      label="Tags"
+                      variant="outlined"
+                      size="small"
+                      className={(classes.textField, classes.textFieldTags)}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      value={inputTags}
+                      onChange={this.onChangeAddTask}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color={isInputWarning ? "secondary" : "primary"}
+                    size="large"
+                    className={classes.buttonStyle}
+                  >
+                    Submit
+                  </Button>
+                </form>
+                {isInputWarning ? (
+                  <p style={{ margin: 0, color: "red" }}>Form Must Not Empty</p>
+                ) : null}
+              </Paper>
+            </Grid>
+          </Grid>
+          <Grid container spacing={4}>
+            <Grid item xs>
+              {ModelStore.data.map((item) => (
+                <Paper className={classes.paper} key={item._id}>
+                  <div className={classes.formContainer}>
+                    <div>
+                      <h2 style={{ margin: 0 }}>{item.text || "No Content"}</h2>
+                      <p style={{ margin: 0 }}>{item.tags || "No Tags"}</p>
+                      <p style={{ margin: 0 }}>
+                        {item.createdAt || "No Date Time"}
+                      </p>
+                    </div>
+                    <div>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="large"
+                        className={classes.buttonTask}
+                        style={{ marginRight: "4px" }}
+                      >
+                        Done
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="large"
+                        className={classes.buttonTask}
+                        style={{
+                          marginRight: "4px",
+                          borderColor: "#FFA114",
+                          color: "#FFA114",
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        size="large"
+                        className={classes.buttonTask}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </Paper>
+              ))}
+            </Grid>
+          </Grid>
+        </Container>
+      </div>
+    );
+  }
+}
+
+export default withStyles(useStyles)(App);
