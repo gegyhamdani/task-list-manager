@@ -20,7 +20,7 @@ class BaseComponent extends React.PureComponent {
   };
 }
 
-const useStyles = (theme) => ({
+const useStyles = () => ({
   root: {
     flexGrow: 1,
   },
@@ -61,6 +61,9 @@ class App extends BaseComponent {
       isInputWarning: false,
       inputContent: "",
       inputTags: "",
+      editableContentIndex: null,
+      editInputContent: "",
+      isEditWarning: false,
     };
   }
 
@@ -113,9 +116,48 @@ class App extends BaseComponent {
     ModelStore.deleteItem(id);
   };
 
+  handleOpenEditTask = (event, text, index) => {
+    event.preventDefault();
+    this.setState({
+      editInputContent: text,
+      editableContentIndex: index,
+    });
+  };
+
+  onChangeEditTask = (event) => {
+    this.setState({
+      editInputContent: event.target.value,
+      isEditWarning: false,
+    });
+  };
+
+  handleEditTask = async (event, id) => {
+    event.preventDefault();
+    if (!this.state.editInputContent) {
+      this.setState({ isEditWarning: true });
+    } else {
+      await ModelStore.editItem(id, {
+        text: this.state.editInputContent,
+      });
+      this.setState({
+        editInputContent: "",
+        editableContentIndex: null,
+        isEditWarning: false,
+      });
+    }
+  };
+
   render() {
     const { state, props } = this;
-    const { inputContent, inputTags, isInputWarning, isInitialized } = state;
+    const {
+      inputContent,
+      inputTags,
+      isInputWarning,
+      isInitialized,
+      editableContentIndex,
+      editInputContent,
+      isEditWarning,
+    } = state;
     const { classes } = props;
 
     if (!isInitialized) {
@@ -182,48 +224,85 @@ class App extends BaseComponent {
           </Grid>
           <Grid container spacing={4}>
             <Grid item xs>
-              {ModelStore.data.map((item) => (
+              {ModelStore.data.map((item, idx) => (
                 <Paper className={classes.paper} key={item._id}>
                   <div className={classes.formContainer}>
                     <div>
-                      <h2 style={{ margin: 0 }}>{item.text || "No Content"}</h2>
+                      {editableContentIndex === idx ? (
+                        <TextField
+                          id="editContent"
+                          label="Edit Content"
+                          size="small"
+                          value={editInputContent}
+                          onChange={this.onChangeEditTask}
+                        />
+                      ) : (
+                        <>
+                          <h2 style={{ margin: 0 }}>
+                            {item.text || "No Content"}
+                          </h2>
+                        </>
+                      )}
                       <p style={{ margin: 0 }}>{item.tags || "No Tags"}</p>
                       <p style={{ margin: 0 }}>
                         {item.createdAt || "No Date Time"}
                       </p>
+                      {isEditWarning && editableContentIndex === idx ? (
+                        <p style={{ margin: 0, color: "red" }}>
+                          Content Must Not Empty
+                        </p>
+                      ) : null}
                     </div>
                     <div>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        className={classes.buttonTask}
-                        style={{ marginRight: "4px" }}
-                      >
-                        Done
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        className={classes.buttonTask}
-                        style={{
-                          marginRight: "4px",
-                          borderColor: "#FFA114",
-                          color: "#FFA114",
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="large"
-                        className={classes.buttonTask}
-                        onClick={() => this.handleDeleteTask(item._id)}
-                      >
-                        Delete
-                      </Button>
+                      {editableContentIndex === idx ? (
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="large"
+                          className={classes.buttonTask}
+                          style={{ marginRight: "4px" }}
+                          onClick={(e) => this.handleEditTask(e, item._id)}
+                        >
+                          Done Editing
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            size="large"
+                            className={classes.buttonTask}
+                            style={{ marginRight: "4px" }}
+                          >
+                            Done
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            size="large"
+                            className={classes.buttonTask}
+                            style={{
+                              marginRight: "4px",
+                              borderColor: "#FFA114",
+                              color: "#FFA114",
+                            }}
+                            onClick={(e) =>
+                              this.handleOpenEditTask(e, item.text, idx)
+                            }
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            size="large"
+                            className={classes.buttonTask}
+                            onClick={() => this.handleDeleteTask(item._id)}
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </Paper>
