@@ -67,8 +67,17 @@ class App extends BaseComponent {
       editableContentIndex: null,
       editInputContent: "",
       isEditWarning: false,
+      isConnectionLoss: false,
     };
   }
+
+  handleConnectionChange = () => {
+    const condition = navigator.onLine ? "online" : "offline";
+    if (condition === "offline") {
+      return this.setState({ isConnectionLoss: true });
+    }
+    return this.setState({ isConnectionLoss: false });
+  };
 
   async componentDidMount() {
     ModelStore.setName("todos_gegy");
@@ -77,6 +86,7 @@ class App extends BaseComponent {
       isInitialized: true,
     });
     this.unsubStore = ModelStore.subscribe(this.rerender);
+    this.handleConnectionChange();
   }
 
   async componentDidUpdate() {
@@ -86,10 +96,18 @@ class App extends BaseComponent {
       await ModelStore.initialize();
       console.log("popup done");
     }
+    window.addEventListener("online", () => {
+      this.handleConnectionChange();
+    });
+    window.addEventListener("offline", () => {
+      this.handleConnectionChange();
+    });
   }
 
   componentWillUnmount() {
     this.unsubStore();
+    window.removeEventListener("online", this.handleConnectionChange());
+    window.removeEventListener("offline", this.handleConnectionChange());
   }
 
   onChangeAddTask = (event) => {
