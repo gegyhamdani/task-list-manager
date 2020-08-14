@@ -35,20 +35,20 @@ const TaskList = ({
                       onChange={(e) => onChangeEditTask(e)}
                     />
                   ) : (
-                    <div className={classes.contentHeader}>
-                      <h2 className={classes.textStyle}>
-                        {item.text || "No Content"}
-                      </h2>
-                      {item.done && (
-                        <img
-                          src="./done.png"
-                          alt="Logo"
-                          height={15}
-                          style={{ marginLeft: "4px" }}
-                        />
-                      )}
-                    </div>
-                  )}
+                      <div className={classes.contentHeader}>
+                        <h2 className={classes.textStyle}>
+                          {item.text || "No Content"}
+                        </h2>
+                        {item.done && (
+                          <img
+                            src="./done.png"
+                            alt="Logo"
+                            height={15}
+                            style={{ marginLeft: "4px" }}
+                          />
+                        )}
+                      </div>
+                    )}
                   <p className={classes.textStyle}>{item.tags || "No Tags"}</p>
                   <p className={classes.textStyle}>
                     {item.createdAt || "No Date Time"}
@@ -56,6 +56,11 @@ const TaskList = ({
                   {isEditWarning && editableContentIndex === idx && (
                     <p className={classes.textStyle} style={{ color: "red" }}>
                       Content Must Not Empty
+                    </p>
+                  )}
+                  {!ModelStore.checkIsUploaded(item) && (
+                    <p className={classes.textStyle} style={{ fontSize: "12px", color: '#FFA114' }}>
+                      Not Sync
                     </p>
                   )}
                 </div>
@@ -67,47 +72,47 @@ const TaskList = ({
                       size="large"
                       className={classes.buttonTask}
                       style={{ marginRight: "4px" }}
-                      onClick={(e) => onEditTask(e, item._id)}
+                      onClick={(e) => onEditTask(e, item)}
                     >
                       Done Editing
                     </Button>
                   ) : (
-                    <>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        className={classes.buttonTask}
-                        style={{ marginRight: "4px" }}
-                        onClick={(e) => onDoneTask(e, item._id, item.done)}
-                      >
-                        {item.done ? "UnDone" : "Done"}
+                      <>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="large"
+                          className={classes.buttonTask}
+                          style={{ marginRight: "4px" }}
+                          onClick={(e) => onDoneTask(e, item)}
+                        >
+                          {item.done ? "UnDone" : "Done"}
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="large"
+                          className={classes.buttonTask}
+                          style={{
+                            marginRight: "4px",
+                            borderColor: "#FFA114",
+                            color: "#FFA114",
+                          }}
+                          onClick={(e) => onOpenEditTask(e, item, idx)}
+                        >
+                          Edit
                       </Button>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        className={classes.buttonTask}
-                        style={{
-                          marginRight: "4px",
-                          borderColor: "#FFA114",
-                          color: "#FFA114",
-                        }}
-                        onClick={(e) => onOpenEditTask(e, item.text, idx)}
-                      >
-                        Edit
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="large"
+                          className={classes.buttonTask}
+                          onClick={() => onDeleteTask(item)}
+                        >
+                          Delete
                       </Button>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="large"
-                        className={classes.buttonTask}
-                        onClick={() => onDeleteTask(item._id)}
-                      >
-                        Delete
-                      </Button>
-                    </>
-                  )}
+                      </>
+                    )}
                 </div>
               </div>
             </Paper>

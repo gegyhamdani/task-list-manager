@@ -1,7 +1,7 @@
 import React from "react";
 import ModelStore from "./model/ModelStore";
 
-import { Container, withStyles } from "@material-ui/core";
+import { Container, withStyles, Button } from "@material-ui/core";
 
 import FormInputTask from "./component/FormInputTask";
 import TaskList from "./component/TaskList";
@@ -120,10 +120,10 @@ class App extends BaseComponent {
     ModelStore.deleteItem(id);
   };
 
-  handleOpenEditTask = (event, text, index) => {
+  handleOpenEditTask = (event, task, index) => {
     event.preventDefault();
     this.setState({
-      editInputContent: text,
+      editInputContent: task.text,
       editableContentIndex: index,
     });
   };
@@ -135,12 +135,13 @@ class App extends BaseComponent {
     });
   };
 
-  handleEditTask = async (event, id) => {
+  handleEditTask = async (event, task) => {
     event.preventDefault();
     if (!this.state.editInputContent) {
       this.setState({ isEditWarning: true });
     } else {
-      await ModelStore.editItem(id, {
+      await ModelStore.editItem(task._id, {
+        ...task,
         text: this.state.editInputContent,
       });
       this.setState({
@@ -151,11 +152,23 @@ class App extends BaseComponent {
     }
   };
 
-  handleDoneTask = async (event, id, doneStatus) => {
+  handleDoneTask = async (event, task) => {
     event.preventDefault();
-    await ModelStore.editItem(id, {
-      done: !doneStatus,
+    await ModelStore.editItem(task._id, {
+      ...task,
+      done: !task.done,
     });
+  };
+
+  handleUploadTask = async () => {
+    console.log("uploading...");
+    try {
+      await ModelStore.upload();
+      console.log("upload done");
+    } catch (err) {
+      alert(err.message);
+      console.log("upload failed");
+    }
   };
 
   render() {
@@ -187,6 +200,23 @@ class App extends BaseComponent {
             inputTags={inputTags}
             isInputWarning={isInputWarning}
           />
+          <div
+            style={{
+              margin: "10px 0",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              className={classes.buttonStyle}
+              onClick={this.handleUploadTask}
+            >
+              {`Sync (${ModelStore.countUnuploadeds()})`}
+            </Button>
+          </div>
           <TaskList
             ModelStore={ModelStore}
             classes={classes}
