@@ -1,7 +1,7 @@
 import React from "react";
 import ModelStore from "./model/ModelStore";
 
-import { Container, withStyles, Button } from "@material-ui/core";
+import { Container, withStyles, Button, Paper } from "@material-ui/core";
 
 import FormInputTask from "./component/FormInputTask";
 import TaskList from "./component/TaskList";
@@ -199,6 +199,7 @@ class App extends BaseComponent {
       editableContentIndex,
       editInputContent,
       isEditWarning,
+      isConnectionLoss,
     } = state;
     const { classes } = props;
 
@@ -208,6 +209,25 @@ class App extends BaseComponent {
 
     return (
       <div className={classes.root}>
+        {isConnectionLoss && (
+          <Paper
+            className={classes.paper}
+            style={{
+              backgroundColor: "#F50000",
+              height: "30px",
+              padding: 0,
+              textAlign: "center",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <p className={classes.textStyle} style={{ color: "#ffffff" }}>
+              CONNECTION LOST !
+            </p>
+          </Paper>
+        )}
+
         <Container maxWidth="md">
           <h1 style={{ textAlign: "center" }}>Task List Manager</h1>
           <FormInputTask
