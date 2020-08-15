@@ -8,8 +8,17 @@ const initialCli = async () => {
   console.log("popup done");
 };
 
+const handleAddTask = async (task) => {
+  const { taskName, taskTags } = task;
+  await ModelStore.addItem({
+    text: taskName,
+    tags: taskTags,
+    done: false,
+  });
+};
+
 const showAllTask = () => {
-  var taskData = ModelStore.data.map(function (item, index) {
+  var taskData = ModelStore.data.map((item, index) => {
     const { _id, text: content, tags, done } = item;
     return `No.${index + 1} ${JSON.stringify({ _id, content, tags, done })}`;
   });
@@ -18,19 +27,51 @@ const showAllTask = () => {
     .prompt([
       {
         type: "list",
-        name: "choice",
+        name: "list-task",
         message: "List Task",
         choices: [...taskData, new inquirer.Separator()],
       },
     ])
     .then((answers) => {
-      return process.exit();
+      return actionCli();
     })
     .catch((error) => {
       if (error.isTtyError) {
-        // Prompt couldn't be rendered in the current environment
+        console.log("Prompt couldnt be rendered in the current environment");
       } else {
-        // Something else when wrong
+        console.log("Something else when wrong");
+      }
+    });
+};
+
+const inputTask = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "taskName",
+        message: "Input Your Task Name: ",
+        validate: (input) => {
+          return input.trim() !== "";
+        },
+      },
+      {
+        type: "input",
+        name: "taskTags",
+        message: "Input Your Task Tag: ",
+        validate: (input) => {
+          return input.trim() !== "";
+        },
+      },
+    ])
+    .then((answers) => {
+      return handleAddTask(answers).then(actionCli());
+    })
+    .catch((error) => {
+      if (error.isTtyError) {
+        console.log("Prompt couldnt be rendered in the current environment");
+      } else {
+        console.log("Something else when wrong");
       }
     });
 };
@@ -42,19 +83,26 @@ const actionCli = () => {
         type: "list",
         name: "choice",
         message: "What do you want?",
-        choices: ["View Task", new inquirer.Separator(), "Input Task"],
+        choices: [
+          "View Task",
+          new inquirer.Separator(),
+          "Input Task",
+          new inquirer.Separator(),
+          "Exit",
+        ],
       },
     ])
     .then((answers) => {
       const { choice } = answers;
       if (choice === "View Task") return showAllTask();
+      if (choice === "Input Task") return inputTask();
       return process.exit();
     })
     .catch((error) => {
       if (error.isTtyError) {
-        // Prompt couldn't be rendered in the current environment
+        console.log("Prompt couldnt be rendered in the current environment");
       } else {
-        // Something else when wrong
+        console.log("Something else when wrong");
       }
     });
 };
