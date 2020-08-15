@@ -1,6 +1,8 @@
 import ModelStore from "./model/ModelStoreCli";
 const inquirer = require("inquirer");
 
+//Im sorry i can't finish Edit and Delete Task on CLI
+
 const initialCli = async () => {
   console.log("popup initialize all offline data...");
   ModelStore.setName("todos_gegy");
