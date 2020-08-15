@@ -11,7 +11,12 @@ const initialCli = async () => {
 const listTask = () => {
   return ModelStore.data.map((item, index) => {
     const { _id, text: content, tags, done } = item;
-    return `No.${index + 1} ${JSON.stringify({ _id, content, tags, done })}`;
+    return `No.${index + 1} ${JSON.stringify({
+      _id,
+      content,
+      tags,
+      done,
+    }).replace(/[{}]/g, "")}`;
   });
 };
 
