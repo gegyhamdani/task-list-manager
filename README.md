@@ -1,8 +1,6 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
 ## Task List Manager
 
-This is Task List Manager that build with React.JS (Web App) & Node.JS(Command Line App).
+This is Task List Manager that build with React.JS (Web App) & Node.JS(Command Line App). <br/>
 Also using [pouchy-store](https://github.com/eFishery/pouchy-store) for storing Task.
 
 ## How to use
