@@ -16,7 +16,9 @@ const listTask = () => {
       content,
       tags,
       done,
-    }).replace(/[{}]/g, "")}`;
+    }).replace(/[{}]/g, "")} - ${
+      !ModelStore.checkIsUploaded(item) ? "Not Sync" : "Sync"
+    }`;
   });
 };
 

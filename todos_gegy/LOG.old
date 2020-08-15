@@ -1,5 +1,5 @@
-2020/08/15-15:50:43.484 3db4 Recovering log #80
-2020/08/15-15:50:43.484 3db4 Level-0 table #83: started
-2020/08/15-15:50:43.575 3db4 Level-0 table #83: 237 bytes OK
-2020/08/15-15:50:43.776 3db4 Delete type=0 #80
-2020/08/15-15:50:43.776 3db4 Delete type=3 #78
+2020/08/15-15:51:48.594 3a94 Recovering log #84
+2020/08/15-15:51:48.594 3a94 Level-0 table #86: started
+2020/08/15-15:51:48.675 3a94 Level-0 table #86: 237 bytes OK
+2020/08/15-15:51:48.803 3a94 Delete type=0 #84
+2020/08/15-15:51:48.803 3a94 Delete type=3 #82
