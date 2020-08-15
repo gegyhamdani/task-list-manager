@@ -8,6 +8,13 @@ const initialCli = async () => {
   console.log("popup done");
 };
 
+const listTask = () => {
+  return ModelStore.data.map((item, index) => {
+    const { _id, text: content, tags, done } = item;
+    return `No.${index + 1} ${JSON.stringify({ _id, content, tags, done })}`;
+  });
+};
+
 const handleAddTask = async (task) => {
   const { taskName, taskTags } = task;
   await ModelStore.addItem({
@@ -18,18 +25,13 @@ const handleAddTask = async (task) => {
 };
 
 const showAllTask = () => {
-  var taskData = ModelStore.data.map((item, index) => {
-    const { _id, text: content, tags, done } = item;
-    return `No.${index + 1} ${JSON.stringify({ _id, content, tags, done })}`;
-  });
-
   inquirer
     .prompt([
       {
         type: "list",
         name: "list-task",
         message: "List Task",
-        choices: [...taskData, new inquirer.Separator()],
+        choices: [...listTask(), new inquirer.Separator()],
       },
     ])
     .then((answers) => {
