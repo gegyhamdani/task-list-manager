@@ -31,6 +31,41 @@ const handleAddTask = async (task) => {
   });
 };
 
+const handleUploadTask = async () => {
+  console.log("uploading...");
+  try {
+    await ModelStore.upload();
+    console.log("upload done");
+  } catch (err) {
+    alert(err.message);
+    console.log("upload failed");
+  }
+};
+
+const syncData = () => {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "choiceSync",
+        message: `Sync Data to Server? (there are ${ModelStore.countUnuploadeds()} UnSync data)`,
+        choices: ["Yes", new inquirer.Separator(), "No"],
+      },
+    ])
+    .then((answers) => {
+      const { choiceSync } = answers;
+      if (choiceSync === "Yes") return handleUploadTask().then(actionCli());
+      return actionCli();
+    })
+    .catch((error) => {
+      if (error.isTtyError) {
+        console.log("Prompt couldnt be rendered in the current environment");
+      } else {
+        console.log("Something else when wrong On Uploading");
+      }
+    });
+};
+
 const showAllTask = () => {
   inquirer
     .prompt([
@@ -48,7 +83,7 @@ const showAllTask = () => {
       if (error.isTtyError) {
         console.log("Prompt couldnt be rendered in the current environment");
       } else {
-        console.log("Something else when wrong");
+        console.log("Something else when wrong on List Task");
       }
     });
 };
@@ -80,7 +115,7 @@ const inputTask = () => {
       if (error.isTtyError) {
         console.log("Prompt couldnt be rendered in the current environment");
       } else {
-        console.log("Something else when wrong");
+        console.log("Something else when wrong on Add Task");
       }
     });
 };
@@ -97,6 +132,8 @@ const actionCli = () => {
           new inquirer.Separator(),
           "Input Task",
           new inquirer.Separator(),
+          "Sync Data",
+          new inquirer.Separator(),
           "Exit",
         ],
       },
@@ -105,6 +142,7 @@ const actionCli = () => {
       const { choice } = answers;
       if (choice === "View Task") return showAllTask();
       if (choice === "Input Task") return inputTask();
+      if (choice === "Sync Data") return syncData();
       return process.exit();
     })
     .catch((error) => {
